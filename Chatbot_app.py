@@ -5,40 +5,66 @@ st.title("ChatGPT-like ChatBot")
 
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-if "openai_model" not in st.session_state:
-  st.session_state["openai_model"] = "gpt-3.5-turbo-1106"
+import streamlit as st
+from langchain_core.messages import AIMessage, HumanMessage
+from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 
-if "messages" not in st.session_state:
-  st.session_state.messages = []
 
-for message in st.session_state.messages:
-  with st.chat_message(message["role"]):
-    st.markdown(message["content"])
 
-if prompt := st.chat_input("What is up?"):
-  st.session_state.messages.append({"role": "user", "content": prompt})
-  with st.chat_message("user"):
-    st.markdown(prompt)
+# app config
+st.set_page_config(page_title="Streamlit Chatbot", page_icon="🤖")
+st.title("Chatbot")
 
-  with st.chat_message("assistant"):
-    message_placeholder = st.empty()
-    full_response = ""
-    for response in openai.chat.completions.create(
-        model=st.session_state["openai_model"],
-        messages=[
-          {"role": m["role"], "content": m["content"]}
-          for m in st.session_state.messages
-        ],
-        stream=True,
-    ):
-      try:
-        full_response += response.choices[0].text  # Try accessing text directly
-      except AttributeError:
-        try:
-          full_response += response.choices[0].message.content  # Fallback for message structure
-        except AttributeError:
-          pass  # Handle potential errors or empty responses
+def get_response(user_query, chat_history):
 
-      message_placeholder.markdown(full_response + "▌")
-    message_placeholder.markdown(full_response)
-  st.session_state.messages.append({"role": "assistant", "content": full_response})
+    template = """
+    You are a helpful assistant. Answer the following questions considering the history of the conversation:
+
+    Chat history: {chat_history}
+
+    User question: {user_question}
+    """
+
+    prompt = ChatPromptTemplate.from_template(template)
+
+    llm = ChatOpenAI()
+        
+    chain = prompt | llm | StrOutputParser()
+    
+    return chain.invoke({
+        "chat_history": chat_history,
+        "user_question": user_query,
+    })
+
+# session state
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = [
+        AIMessage(content="Hello, I am a bot. How can I help you?"),
+    ]
+
+    
+# conversation
+for message in st.session_state.chat_history:
+    if isinstance(message, AIMessage):
+        with st.chat_message("AI"):
+            st.write(message.content)
+    elif isinstance(message, HumanMessage):
+        with st.chat_message("Human"):
+            st.write(message.content)
+
+# user input
+user_query = st.chat_input("Type your message here...")
+if user_query is not None and user_query != "":
+    st.session_state.chat_history.append(HumanMessage(content=user_query))
+
+    with st.chat_message("Human"):
+        st.markdown(user_query)
+
+    with st.chat_message("AI"):
+        response = get_response(user_query, st.session_state.chat_history)
+        st.write(response)
+
+    st.session_state.chat_history.append(AIMessage(content=response))
+
