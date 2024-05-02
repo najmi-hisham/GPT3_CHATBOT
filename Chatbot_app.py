@@ -3,7 +3,8 @@ import streamlit as st
 
 st.title("ChatGPT-like ChatBot")
 
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+
+openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
@@ -28,7 +29,7 @@ def get_response(user_query, chat_history):
 
     prompt = ChatPromptTemplate.from_template(template)
 
-    llm = ChatOpenAI()
+    llm = ChatOpenAI(model="gpt-3.5-turbo-1106")
         
     chain = prompt | llm | StrOutputParser()
     
