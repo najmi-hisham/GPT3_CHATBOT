@@ -1,15 +1,14 @@
-import openai
-import streamlit as st
-
-st.title("ChatGPT-like ChatBot")
-
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
+
+st.title("ChatGPT-like ChatBot")
+
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+
+
 
 
 # app config
