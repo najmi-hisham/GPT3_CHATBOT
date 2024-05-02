@@ -3,8 +3,7 @@ import streamlit as st
 
 st.title("ChatGPT-like ChatBot")
 
-
-openai_api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
