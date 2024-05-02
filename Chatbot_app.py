@@ -6,10 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 st.title("ChatGPT-like ChatBot")
 
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-
-
-
+openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 # app config
 st.set_page_config(page_title="Streamlit Chatbot", page_icon="🤖")
